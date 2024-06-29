@@ -23,28 +23,31 @@ const getProduct = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { name, price, category, details } = req.body;
-    const product = new Product({ name, price, category, details });
-
-    // Check if an image file was uploaded
-    if (req.file) {
-      product.image = req.file.path; // Save the file path to the product
-    }
+    const product = new Product({
+      name,
+      price,
+      category,
+      details,
+      image: req.file ? req.file.path : undefined, // Conditionally add image path
+    });
 
     await product.save();
     res.status(201).json(product);
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(400).json({ error: error.message });
   }
 };
 
 const updateProduct = async (req, res) => {
   try {
-    const { name, price, category, details } = req.body;
+    const { name, price, category, details, image } = req.body;
     const updatedProduct = {
       name,
       price,
       category,
       details,
+      image,
     };
 
     // Check if an image file was uploaded
@@ -79,23 +82,34 @@ const searchProducts = async (req, res) => {
     const { name, category, minPrice, maxPrice } = req.query;
     const filter = {};
 
+    // Validate and construct filters
     if (name) {
-      filter.name = new RegExp(name, "i"); // Case-insensitive regex search
+      filter.name = new RegExp(name.trim(), "i"); // Using trim() to remove unnecessary spaces
     }
     if (category) {
-      filter.category = category;
+      filter.category = category.trim();
     }
     if (minPrice) {
-      filter.price = { ...filter.price, $gte: Number(minPrice) };
+      const min = parseFloat(minPrice);
+      if (!isNaN(min)) {
+        // Ensuring the input is a valid number
+        filter.price = { ...filter.price, $gte: min };
+      }
     }
     if (maxPrice) {
-      filter.price = { ...filter.price, $lte: Number(maxPrice) };
+      const max = parseFloat(maxPrice);
+      if (!isNaN(max)) {
+        // Ensuring the input is a valid number
+        filter.price = { ...filter.price, $lte: max };
+      }
     }
 
+    // Fetch products from the database
     const products = await Product.find(filter);
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Server Error", error: error.toString() });
   }
 };
 

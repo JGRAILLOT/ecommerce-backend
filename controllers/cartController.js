@@ -3,9 +3,8 @@ const Cart = require("../models/cart");
 
 const getUserCart = async (req, res) => {
   try {
-    const cart = await Cart.find({ userId: req.user._id }).populate(
-      "productId"
-    );
+    const { userId } = req.body;
+    const cart = await Cart.find({ userId }).populate("productId");
     res.json(cart);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -14,12 +13,26 @@ const getUserCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const { productId } = req.body;
-    const cartItem = new Cart({ userId: req.user._id, productId });
+    const { userId, productId, quantity } = req.body;
+    console.log({ userId, productId, quantity });
+    if (!productId || !quantity || !userId) {
+      return res
+        .status(400)
+        .json({ message: "User ID, Product ID and quantity are required." });
+    }
+
+    // Create a new cart item with quantity
+    const cartItem = new Cart({
+      userId,
+      productId,
+      quantity,
+    });
+
     await cartItem.save();
     res.status(201).json(cartItem);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Add to cart error:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -36,8 +49,8 @@ const removeFromCart = async (req, res) => {
 
 const clearCart = async (req, res) => {
   try {
-    // Remove all items where the userId matches the logged-in user's ID
-    const result = await Cart.deleteMany({ userId: req.user._id });
+    const { userId } = req.body;
+    const result = await Cart.deleteMany({ userId });
     if (result.deletedCount === 0) {
       return res
         .status(404)

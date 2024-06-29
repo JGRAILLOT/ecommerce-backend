@@ -5,15 +5,13 @@ const {
   getAllOrders,
   createOrder,
   deleteOrder,
-  getMostOrderedProduct,
 } = require("../controllers/orderController");
-const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", authMiddleware.verifyUser, getUserOrders);
-router.get("/all", authMiddleware.verifyAdmin, getAllOrders);
+router.get("/", getUserOrders);
+router.get("/all", getAllOrders);
 router.post("/", createOrder);
-router.delete("/:id", authMiddleware.verifyAdmin, deleteOrder);
+router.delete("/:id", deleteOrder);
 
 module.exports = router;

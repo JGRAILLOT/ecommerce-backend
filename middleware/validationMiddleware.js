@@ -1,7 +1,6 @@
 const { check, validationResult } = require("express-validator");
 
 const validateUser = [
-  check("name").isString().isLength({ min: 1 }).trim().escape(),
   check("email").isEmail().normalizeEmail(),
   check("password").isLength({ min: 6 }).trim().escape(),
   (req, res, next) => {

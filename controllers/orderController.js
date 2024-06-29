@@ -13,9 +13,6 @@ const getUserOrders = async (req, res) => {
 };
 
 const getAllOrders = async (req, res) => {
-  if (!req.admin) {
-    return res.status(403).json({ error: "Access denied" });
-  }
   try {
     const orders = await Order.find().populate("userId productId");
     res.json(orders);
