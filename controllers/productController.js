@@ -105,6 +105,7 @@ const searchProducts = async (req, res) => {
     }
 
     // Fetch products from the database
+    console.log("Filters applied:", filter);
     const products = await Product.find(filter);
     res.json(products);
   } catch (error) {

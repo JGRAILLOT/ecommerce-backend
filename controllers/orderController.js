@@ -3,9 +3,13 @@ const Order = require("../models/order");
 
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user._id }).populate(
-      "productId"
-    );
+    const { userId } = req.params; // Access userId from URL parameters
+    const orders = await Order.find({ userId }).populate("products");
+    if (!orders) {
+      return res
+        .status(404)
+        .json({ message: "No orders found for this user." });
+    }
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });

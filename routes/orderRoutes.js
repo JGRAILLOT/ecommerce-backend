@@ -9,7 +9,7 @@ const {
 
 const router = express.Router();
 
-router.get("/", getUserOrders);
+router.get("/:userId", getUserOrders);
 router.get("/all", getAllOrders);
 router.post("/", createOrder);
 router.delete("/:id", deleteOrder);
